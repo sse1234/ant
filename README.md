@@ -1,5 +1,7 @@
 # ant — Amiga Network Terminal
 
+![build](https://github.com/sse1234/ant/actions/workflows/build.yml/badge.svg)
+
 A from-scratch remote shell over TCP/IP for classic AmigaOS (3.x, Roadshow),
 so the Warp 560's working Wi-Fi can replace the Pi serial bridge as the
 day-to-day control path.

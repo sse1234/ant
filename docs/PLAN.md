@@ -23,10 +23,15 @@
       propagation for unknown commands
 - [x] Measured: **40 ms avg round-trip** (20-command burst over one
       connection, emulated 68020) vs seconds-per-command on 9600-baud serial
-- [ ] Deploy to real Amiga (stage_binary.py + amiget), verify against
-      Roadshow + Warp 560 Wi-Fi
-- [ ] Auto-start from S:User-Startup + auto-restart wrapper
-- [ ] Soak test over Wi-Fi (the TelNetD-unreliability question)
+- [ ] Deploy to real Amiga — **kit ready** (`deploy/deploy.py --serial` +
+      `deploy/README.md` checklist), execution needs the hardware
+- [ ] Auto-start from S:User-Startup + auto-restart wrapper — snippet +
+      S:ant-restart script prepared in deploy/, append is step 3 of the
+      checklist
+- [ ] Soak test over Wi-Fi (the TelNetD-unreliability question) — loop
+      one-liner in deploy/README.md step 4
+- [x] CI: GitHub Actions builds ant-server in the crosstools container on
+      every push, checks hunk magic, uploads the binary as artifact
 
 ### Rig niceties
 

@@ -1,0 +1,6 @@
+; S:ant-restart — keep ant-server alive (ANT deploy kit).
+; Started from S:User-Startup via: Run >NIL: Execute S:ant-restart
+Lab restart
+C:ant-server
+Wait 5
+Skip restart BACK
