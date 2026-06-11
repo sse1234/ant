@@ -10,14 +10,14 @@ jobs:
     runs-on: ubuntu-latest
     container: amigadev/crosstools:m68k-amigaos
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Build ant-server
         run: make -C server
       - name: Sanity-check hunk magic
         run: |
           head -c4 server/ant-server | od -An -tx1 | grep -q "00 00 03 f3"
           echo "valid AmigaOS hunk executable"
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: ant-server
           path: server/ant-server
