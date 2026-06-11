@@ -61,16 +61,21 @@ Caveat: UAE bsdsocket emulation has quirks (WaitSelect/signal semantics),
 and the real Roadshow stack is the actual target — final testing happens on
 hardware.
 
-## Toolchain (not yet installed)
+## Toolchain
 
-Options, in order of recommendation for this machine (Apple Silicon):
+bebbo amiga-gcc via the `amigadev/crosstools:m68k-amigaos` Docker image
+(amd64), run through **colima** (`--vm-type vz --vz-rosetta` so x86
+containers go through Rosetta 2 at near-native speed). Setup that was done
+on this machine:
 
-1. **bebbo amiga-gcc via Docker** — `amigadev/crosstools:m68k-amigaos`
-   image, runs under Rosetta. Zero host pollution. `make docker` wraps it.
-2. **vbcc** — native macOS binaries + NDK 3.2 headers; manual install,
-   lighter weight, slower codegen.
+```
+brew install colima docker
+colima start --vm-type vz --vz-rosetta --cpu 4 --memory 4
+cd server && make docker        # → ant-server (AmigaOS hunk executable)
+```
 
-NDK 3.2 ships the Roadshow `netinclude` headers either way.
+After reboot: `colima start` brings the VM back. Alternative toolchain if
+Docker ever annoys: vbcc native macOS + NDK 3.2.
 
 ## Layout
 
@@ -87,5 +92,6 @@ ant/
 
 ## Status
 
-Scaffold only. Nothing compiled yet — first milestone is building phase 0
-and seeing it answer over TCP inside FS-UAE.
+Phase 0 daemon compiles clean. Next: FS-UAE rig with
+`bsdsocket_library = 1`, boot AmigaVision DH0, run `ant-server`, and talk
+to it from the Mac.

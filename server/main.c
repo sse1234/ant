@@ -6,9 +6,8 @@
  * given port (default 6860), echoes lines back, "quit" closes the
  * connection, Ctrl-C at the shell stops the daemon.
  *
- * UNTESTED SKELETON until the cross toolchain is set up — expect to touch
- * the includes (socketbasetags.h location varies between AmiTCP-era and
- * Roadshow-era SDKs).
+ * Compiles clean with bebbo m68k-amigaos-gcc (crosstools image); runtime
+ * still unproven until the FS-UAE bsdsocket test.
  */
 
 #include <exec/types.h>
@@ -46,7 +45,7 @@ int main(int argc, char **argv)
     LONG n, on = 1;
     int rc = RETURN_FAIL;
 
-    SocketBase = OpenLibrary("bsdsocket.library", 4);
+    SocketBase = OpenLibrary((STRPTR)"bsdsocket.library", 4);
     if (!SocketBase) {
         fprintf(stderr,
                 "ant-server: no bsdsocket.library v4 — TCP/IP stack not running?\n");
@@ -87,7 +86,7 @@ int main(int argc, char **argv)
             break; /* EINTR via break mask, or stack went away */
 
         printf("ant-server: connection from %s\n", Inet_NtoA(sa.sin_addr.s_addr));
-        send(cli, greeting, sizeof(greeting) - 1, 0);
+        send(cli, (char *)greeting, sizeof(greeting) - 1, 0);
 
         for (;;) {
             n = recv(cli, buf, sizeof(buf), 0);

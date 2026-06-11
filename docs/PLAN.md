@@ -2,8 +2,10 @@
 
 ## Phase 0 — smoke test
 
-- [ ] Pick + install toolchain (Docker amigadev/crosstools vs vbcc)
-- [ ] Compile `server/main.c` echo daemon
+- [x] Pick + install toolchain — colima (vz + Rosetta) +
+      amigadev/crosstools:m68k-amigaos Docker image
+- [x] Compile `server/main.c` echo daemon — clean build, AmigaOS hunk
+      executable, 13.7 KB
 - [ ] FS-UAE rig: config with `bsdsocket_library = 1`, shared dir to get the
       binary in (or use AmigaVision DH0 + a mounted host directory)
 - [ ] `nc localhost 6860` echoes
