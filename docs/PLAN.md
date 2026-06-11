@@ -28,6 +28,14 @@
 - [ ] Auto-start from S:User-Startup + auto-restart wrapper
 - [ ] Soak test over Wi-Fi (the TelNetD-unreliability question)
 
+### Rig niceties
+
+- [x] `rig/setup-rig.sh` extracts C:/Libs:/L: from the AmigaVision HDF
+      (pfs3) so the rig behaves like a real Workbench — List/Avail/Type/
+      Copy/Execute etc. all verified through ANT. OS files stay gitignored.
+      Note: `pfs3 extract -o DIR /Drawer` writes the drawer *contents* into
+      DIR — give each drawer its own target.
+
 ### Hard-won rig/daemon lessons (already encoded in code/rig)
 
 - Bare-Kickstart boots have only ROM-internal shell commands (Echo, CD,

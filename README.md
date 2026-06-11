@@ -97,11 +97,15 @@ round-trip (vs seconds over 9600-baud serial), output + return code
 faithfully relayed, binary-safe protocol.
 
 ```
+# once: populate rig/boot/ with C:/Libs:/L: from the AmigaVision HDF
+# (copyrighted OS files — gitignored, never committed)
+./rig/setup-rig.sh
+
 # terminal 1 — boots straight into the daemon
 /Applications/FS-UAE.app/Contents/MacOS/fs-uae rig/ant-dev.fs-uae
 
 # terminal 2
-ANT_HOST=localhost python3 client/ant.py run 'Echo "Hello"'
+ANT_HOST=localhost python3 client/ant.py run 'List ANT:'
 ANT_HOST=localhost python3 client/ant.py shell
 ```
 

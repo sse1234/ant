@@ -2,5 +2,6 @@
 ant-server
 .DS_Store
 out/
-rig/boot/C/ant-server
+rig/boot/*
+!rig/boot/S/
 __pycache__/
