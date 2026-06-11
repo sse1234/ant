@@ -2,3 +2,4 @@
 ant-server
 .DS_Store
 out/
+rig/boot/C/ant-server

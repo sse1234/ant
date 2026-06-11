@@ -1,0 +1,3 @@
+Echo "ANT dev rig"
+Stack 16384
+C:ant-server

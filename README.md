@@ -92,6 +92,18 @@ ant/
 
 ## Status
 
-Phase 0 daemon compiles clean. Next: FS-UAE rig with
-`bsdsocket_library = 1`, boot AmigaVision DH0, run `ant-server`, and talk
-to it from the Mac.
+**Phase 1 working end-to-end in the FS-UAE rig**: 40 ms avg command
+round-trip (vs seconds over 9600-baud serial), output + return code
+faithfully relayed, binary-safe protocol.
+
+```
+# terminal 1 — boots straight into the daemon
+/Applications/FS-UAE.app/Contents/MacOS/fs-uae rig/ant-dev.fs-uae
+
+# terminal 2
+ANT_HOST=localhost python3 client/ant.py run 'Echo "Hello"'
+ANT_HOST=localhost python3 client/ant.py shell
+```
+
+Next: deploy to the real Amiga (Roadshow + Warp 560), S:User-Startup
+autostart, Wi-Fi soak test. Then phase 2 (interactive console handler).

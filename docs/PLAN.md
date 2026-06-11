@@ -6,21 +6,38 @@
       amigadev/crosstools:m68k-amigaos Docker image
 - [x] Compile `server/main.c` echo daemon — clean build, AmigaOS hunk
       executable, 13.7 KB
-- [ ] FS-UAE rig: config with `bsdsocket_library = 1`, shared dir to get the
-      binary in (or use AmigaVision DH0 + a mounted host directory)
-- [ ] `nc localhost 6860` echoes
-- [ ] Same on real hardware (deploy via stage_binary.py, run from AUX shell)
+- [x] FS-UAE rig: `rig/ant-dev.fs-uae` — bare-Kickstart boot from host dir
+      `rig/boot/`, `bsdsocket_library = 1` (FS-UAE 3.2.35 via brew cask)
+- [x] Port answers from the Mac side
+      (phase 0 was folded into phase 1 verification)
 
 ## Phase 1 — command executor
 
-- [ ] Protocol: newline-delimited command in, output + exit sentinel back
-      (keep it dumb; no telnet negotiation)
-- [ ] Per-connection: `System("...", SYS_Input/SYS_Output → PIPE: pair)`
-- [ ] Pump socket ⇄ pipe with WaitSelect + dos signals
-- [ ] `client/ant.py run "<cmd>"` — drop-in replacement for amiga_serial.py
-      scripted use
+- [x] Protocol: command line in → `ANT1 rc=<n> len=<n>` header + raw output
+      bytes back; many commands per connection; binary-safe
+- [x] Execution: synchronous `System()` (shell internals work), stdin NIL:,
+      output captured to T: (RAM: fallback) and streamed back.
+      PIPE:-streaming during execution deferred — phase 2 solves it properly
+- [x] `client/ant.py run "<cmd>"` + `shell` REPL; rc mirrored as exit code
+- [x] Verified e2e in FS-UAE rig: Echo round-trip, error text + rc=10
+      propagation for unknown commands
+- [x] Measured: **40 ms avg round-trip** (20-command burst over one
+      connection, emulated 68020) vs seconds-per-command on 9600-baud serial
+- [ ] Deploy to real Amiga (stage_binary.py + amiget), verify against
+      Roadshow + Warp 560 Wi-Fi
 - [ ] Auto-start from S:User-Startup + auto-restart wrapper
-- [ ] Measure: command round-trip vs 9600-baud serial
+- [ ] Soak test over Wi-Fi (the TelNetD-unreliability question)
+
+### Hard-won rig/daemon lessons (already encoded in code/rig)
+
+- Bare-Kickstart boots have only ROM-internal shell commands (Echo, CD,
+  Stack...) — no MakeDir/Assign/List. Keep the rig startup-sequence to
+  internals only.
+- Boot shell default stack is 4k; `Stack 16384` before launching the daemon.
+- `pr_WindowPtr = -1` in the daemon or any missing-volume Open() raises a
+  blocking "Please insert volume" requester. This bit us in the rig
+  (`Open("T:...")` with no T: assign) and matches the known real-hardware
+  gotcha from amiga-tools PROJECT_MEMORY.
 
 ## Phase 2 — interactive terminal
 
