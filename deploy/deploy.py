@@ -5,12 +5,16 @@
     python3 deploy/deploy.py --serial    # also drive the install over the
                                          # Pi serial bridge (amiga-tools)
 
-Stages server/ant-server and deploy/ant-restart to the Pi proxy's static
-dir (verbatim bytes, like amiga-tools stage_binary.py), so the Amiga can
-fetch them with `amiget local/<name>`. With --serial, runs the fetch +
-install commands through amiga-tools/amiga_serial.py.
+This kit assumes the author's setup: a Raspberry Pi serial bridge running
+the amiga-tools HTTP proxy/mirror (companion project). It stages
+server/ant-server and deploy/ant-restart to the Pi proxy's static dir
+(verbatim bytes), so the Amiga can fetch them with `amiget local/<name>`.
+With --serial, runs the fetch + install through amiga-tools'
+amiga_serial.py. Any other way of getting two files onto the Amiga works
+just as well — see deploy/README.md.
 
-Needs $amiga_user/$amiga_pw in ~/dev/.env.local. The User-Startup append
+Knobs: ANT_PI_HOST (Pi address), AMIGA_TOOLS (checkout path),
+$amiga_user/$amiga_pw in ~/dev/.env.local. The User-Startup append
 stays manual on purpose — see deploy/README.md (serial Echo append has
 truncated S:User-Startup before; small steps + verify).
 
@@ -18,6 +22,7 @@ NOTE: untested against real hardware until the next Amiga session.
 """
 from __future__ import annotations
 
+import os
 import re
 import subprocess
 import sys
@@ -26,10 +31,10 @@ from pathlib import Path
 import paramiko
 
 ENV = Path.home() / "dev" / ".env.local"
-PI_HOST = "192.168.178.140"
+PI_HOST = os.environ.get("ANT_PI_HOST", "raspberrypi.local")
 REMOTE_DIR = "/opt/amiga-proxy/static"
 HERE = Path(__file__).resolve().parent
-AMIGA_TOOLS = Path.home() / "dev" / "amiga-tools"
+AMIGA_TOOLS = Path(os.environ.get("AMIGA_TOOLS", str(Path.home() / "dev" / "amiga-tools")))
 
 # (serial command, extra amiga_serial.py args) — network fetches get the
 # long-lull treatment like the amiga-tools README examples.

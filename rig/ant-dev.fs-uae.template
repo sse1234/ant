@@ -1,0 +1,19 @@
+# ANT dev rig template — setup-rig.sh fills in the ROM and boot-dir paths
+# and writes rig/ant-dev.fs-uae (gitignored, machine-local). Workbench-less
+# boot straight into ant-server, with UAE bsdsocket emulation mapping
+# Amiga sockets onto host sockets.
+#
+#   fs-uae rig/ant-dev.fs-uae
+#   nc localhost 6860            # or: ANT_HOST=localhost client/ant.py
+[fs-uae]
+amiga_model = A1200/020
+chip_memory = 2048
+fast_memory = 8192
+kickstart_file = @KICK@
+hard_drive_0 = @BOOT@
+hard_drive_0_label = ANT
+bsdsocket_library = 1
+fullscreen = 0
+window_width = 720
+window_height = 566
+floppy_drive_count = 0

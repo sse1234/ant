@@ -2,114 +2,115 @@
 
 ![build](https://github.com/sse1234/ant/actions/workflows/build.yml/badge.svg)
 
-A from-scratch remote shell over TCP/IP for classic AmigaOS (3.x, Roadshow),
-so the Warp 560's working Wi-Fi can replace the Pi serial bridge as the
-day-to-day control path.
+A from-scratch remote shell over TCP/IP for classic AmigaOS 3.x, so a
+networked Amiga (any bsdsocket-capable stack: Roadshow, AmiTCP, ...) can be
+driven from a modern machine at LAN speed — no serial cable, no telnet
+daemon of dubious vintage.
 
 ```
-Mac ──TCP :6860──► Warp 560 Wi-Fi ──► Roadshow bsdsocket.library
-                                            │
-                                       ant-server (C, 68k)
-                                            │
-                                  PIPE: / custom handler
-                                            │
-                                      AmigaDOS shell
+modern box ──TCP :6860──► Amiga NIC/Wi-Fi ──► bsdsocket.library
+                                                    │
+                                               ant-server (C, 68k)
+                                                    │
+                                          T:/RAM: capture (phase 1)
+                                          console handler (phase 2)
+                                                    │
+                                              AmigaDOS shell
 ```
-
-The serial bridge (see `~/dev/amiga-tools`) stays as fallback and as the
-deployment path for the server binary itself.
 
 ## Why from scratch
 
-Native TelNetD under Roadshow proved unreliable in practice, and no other
-maintained network terminal for AmigaOS 3.x exists. A single-purpose daemon
-we control end-to-end can be kept deliberately small, auto-restarted from
-`S:User-Startup`, and tuned to our actual use (scripted command execution
-from `amiga_serial.py`-style tooling, later interactive use).
+Native TelNetD setups on AmigaOS 3.x proved unreliable in practice, and no
+maintained network terminal for the classic OS exists. A single-purpose
+daemon kept deliberately small can be auto-restarted from `S:User-Startup`
+and tuned to real use: scripted command execution first, interactive
+sessions next.
 
-Reference material worth mining (not dependencies): AmiTCP `telnetd` source
-on Aminet, Roadshow SDK examples, `telser.device` (telnet-as-serial-device —
-its existence proves the socket-backed-console concept on this platform).
+Reference material worth mining (not dependencies): AmiTCP `telnetd`
+source on Aminet, Roadshow SDK examples, `telser.device` (telnet-as-
+serial-device — its existence proves the socket-backed-console concept on
+this platform).
 
 ## Phased plan
 
-| Phase | Deliverable | Difficulty |
-| ----- | ----------- | ---------- |
-| 0 | TCP echo daemon — proves toolchain + bsdsocket + emulator/hw network path | trivial |
-| 1 | Command executor: per-connection `System()` with `PIPE:` redirected stdin/stdout, Python client. Replaces 9600-baud serial for scripted use | moderate |
-| 2 | Interactive terminal: custom DOS console handler (socket-backed `AUX:` equivalent), raw mode, window size | the real work |
-| 3 | Hardening: shared-secret auth, keepalives, reconnect, multi-session | incremental |
+| Phase | Deliverable | Status |
+| ----- | ----------- | ------ |
+| 0 | TCP echo daemon — toolchain + bsdsocket + network path | ✅ folded into 1 |
+| 1 | Command executor: one command in, output + return code back | ✅ rig-verified, 40 ms/cmd |
+| 2 | Interactive terminal: custom DOS console handler, raw mode | next |
+| 3 | Hardening: shared-secret auth, keepalives, reconnect, multi-session | later |
 
-Phase 1 already delivers the main win (LAN-speed command round-trips vs.
-9600 baud). Phase 2 is where DOS-packet arcana lives; it's well documented
-(DOS manual, Guru Book) but fiddly.
+Protocol (phase 1): client sends a command line; server runs it via
+`System()` and answers `ANT1 rc=<n> len=<n>\n` followed by exactly `len`
+raw output bytes. Many commands per connection, binary-safe.
 
-## Dev loop
+See [docs/PLAN.md](docs/PLAN.md) for checklists and the hard-won
+AmigaOS-daemon lessons (requester suppression, stack sizes, ...).
 
-**No real Amiga needed for iteration.** FS-UAE (and Amiberry) implement UAE
-`bsdsocket.library` emulation that maps Amiga socket calls onto host
-sockets:
+## Dev loop — no real Amiga required
 
-```
-# in the .fs-uae config:
-bsdsocket_library = 1
-```
-
-So: cross-compile on macOS → run in FS-UAE (AmigaVision DH0 boots a normal
-Workbench) → connect from a Mac terminal to localhost. Deploy to the real
-Amiga afterwards via `stage_binary.py` + `amiget` from amiga-tools.
-
-Caveat: UAE bsdsocket emulation has quirks (WaitSelect/signal semantics),
-and the real Roadshow stack is the actual target — final testing happens on
-hardware.
-
-## Toolchain
-
-bebbo amiga-gcc via the `amigadev/crosstools:m68k-amigaos` Docker image
-(amd64), run through **colima** (`--vm-type vz --vz-rosetta` so x86
-containers go through Rosetta 2 at near-native speed). Setup that was done
-on this machine:
+FS-UAE (and Amiberry) implement UAE `bsdsocket.library` emulation that maps
+Amiga socket calls onto host sockets (`bsdsocket_library = 1`). The rig in
+`rig/` boots a minimal Workbench from a host directory straight into the
+daemon:
 
 ```
-brew install colima docker
-colima start --vm-type vz --vz-rosetta --cpu 4 --memory 4
-cd server && make docker        # → ant-server (AmigaOS hunk executable)
-```
-
-After reboot: `colima start` brings the VM back. Alternative toolchain if
-Docker ever annoys: vbcc native macOS + NDK 3.2.
-
-## Layout
-
-```
-ant/
-├── README.md
-├── docs/PLAN.md          # phase checklists, open questions
-├── server/               # Amiga-side daemon (C, 68k)
-│   ├── main.c            # phase 0: echo daemon skeleton (untested until toolchain lands)
-│   └── Makefile
-└── client/
-    └── ant.py            # Mac-side client
-```
-
-## Status
-
-**Phase 1 working end-to-end in the FS-UAE rig**: 40 ms avg command
-round-trip (vs seconds over 9600-baud serial), output + return code
-faithfully relayed, binary-safe protocol.
-
-```
-# once: populate rig/boot/ with C:/Libs:/L: from the AmigaVision HDF
-# (copyrighted OS files — gitignored, never committed)
+# once: populate rig/boot/ with C:/Libs:/L: from an AmigaVision (or any
+# Workbench) disk image — OS files are copyrighted and stay gitignored
 ./rig/setup-rig.sh
 
-# terminal 1 — boots straight into the daemon
-/Applications/FS-UAE.app/Contents/MacOS/fs-uae rig/ant-dev.fs-uae
+# terminal 1
+fs-uae rig/ant-dev.fs-uae
 
 # terminal 2
 ANT_HOST=localhost python3 client/ant.py run 'List ANT:'
 ANT_HOST=localhost python3 client/ant.py shell
 ```
 
-Next: deploy to the real Amiga (Roadshow + Warp 560), S:User-Startup
-autostart, Wi-Fi soak test. Then phase 2 (interactive console handler).
+`setup-rig.sh` needs an RDB disk image with a Workbench partition and the
+[pfs3](https://github.com/metaneutrons/pfs3) tool for extraction; point it
+at yours with `HDF=` / `PFS3=` / `KICK=`. Final testing belongs on real
+hardware — the UAE stack is not Roadshow.
+
+## Toolchain
+
+bebbo's amiga-gcc via the `amigadev/crosstools:m68k-amigaos` Docker image:
+
+```
+cd server && make docker        # → ant-server (AmigaOS hunk executable)
+```
+
+On Apple Silicon, colima with `--vm-type vz --vz-rosetta` runs the amd64
+image at near-native speed. CI builds the binary on every push and uploads
+it as an artifact. Alternative: vbcc + NDK 3.2.
+
+## Client
+
+```
+python3 client/ant.py run 'Version'        # one command, rc as exit code
+python3 client/ant.py shell                # REPL
+```
+
+Target host: `--host`, or `ANT_HOST` in the environment (default `amiga`).
+
+## Layout
+
+```
+ant/
+├── server/           # Amiga-side daemon (C, 68k) + Makefile
+├── client/ant.py     # modern-side client
+├── rig/              # FS-UAE dev rig (setup script + config + boot dir)
+├── deploy/           # real-hardware deployment kit + checklist
+└── docs/PLAN.md      # phase checklists, open questions, lessons
+```
+
+## Status
+
+Phase 1 verified end-to-end in the emulator rig: 40 ms average command
+round-trip, output and return codes relayed byte-exact. Real-hardware
+deployment kit ready (`deploy/`), awaiting an Amiga session. Phase 2
+(interactive console handler) is next.
+
+## License
+
+MIT — see [LICENSE](LICENSE).

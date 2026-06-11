@@ -16,7 +16,7 @@ import os
 import socket
 import sys
 
-DEFAULT_HOST = os.environ.get("ANT_HOST", "192.168.178.139")
+DEFAULT_HOST = os.environ.get("ANT_HOST", "amiga")
 DEFAULT_PORT = int(os.environ.get("ANT_PORT", "6860"))
 
 

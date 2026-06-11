@@ -49,8 +49,8 @@
 - Boot shell default stack is 4k; `Stack 16384` before launching the daemon.
 - `pr_WindowPtr = -1` in the daemon or any missing-volume Open() raises a
   blocking "Please insert volume" requester. This bit us in the rig
-  (`Open("T:...")` with no T: assign) and matches the known real-hardware
-  gotcha from amiga-tools PROJECT_MEMORY.
+  (`Open("T:...")` with no T: assign) and matches a known real-hardware
+  failure mode (requesters silently freezing remote shells).
 
 ## Phase 2 — interactive terminal
 
