@@ -1,0 +1,4 @@
+*.o
+ant-server
+.DS_Store
+out/
