@@ -21,17 +21,22 @@
 - [x] `client/ant.py run "<cmd>"` + `shell` REPL; rc mirrored as exit code
 - [x] Verified e2e in FS-UAE rig: Echo round-trip, error text + rc=10
       propagation for unknown commands
-- [x] Measured: **40 ms avg round-trip** (20-command burst over one
-      connection, emulated 68020) vs seconds-per-command on 9600-baud serial
-- [ ] Deploy to real Amiga — **kit ready** (`deploy/deploy.py --serial` +
-      `deploy/README.md` checklist), execution needs the hardware
-- [ ] Auto-start from S:User-Startup + auto-restart wrapper — snippet +
-      S:ant-restart script prepared in deploy/, append is step 3 of the
-      checklist
-- [ ] Soak test over Wi-Fi (the TelNetD-unreliability question) — loop
-      one-liner in deploy/README.md step 4
+- [x] Measured: 40 ms avg round-trip in the emulated rig; **22 ms avg on
+      real hardware** (KS 47.63 / 68060, 20-command burst) vs
+      seconds-per-command on 9600-baud serial
+- [x] Deployed to real Amiga via `deploy/deploy.py --serial` (Pi mirror +
+      serial install): `Echo "hello from real iron"` answered first try
+- [x] Auto-start from S:User-Startup + S:ant-restart watchdog — survives a
+      cold boot: port 6860 opened on its own after reboot, no serial
+      intervention, first command succeeded
+- [x] Soak test over Wi-Fi: **40/40 probes, 0 drops over 20 min** (30s
+      interval, fresh TCP connection each time). Strongly implicates the old
+      *TelNetD* itself, not the Warp Wi-Fi driver / Roadshow, for the
+      historical flakiness
 - [x] CI: GitHub Actions builds ant-server in the crosstools container on
       every push, checks hunk magic, uploads the binary as artifact
+
+**Phase 1 complete — running in production on the real Amiga.**
 
 ### Rig niceties
 

@@ -36,7 +36,7 @@ this platform).
 | Phase | Deliverable | Status |
 | ----- | ----------- | ------ |
 | 0 | TCP echo daemon — toolchain + bsdsocket + network path | ✅ folded into 1 |
-| 1 | Command executor: one command in, output + return code back | ✅ rig-verified, 40 ms/cmd |
+| 1 | Command executor: one command in, output + return code back | ✅ live on real hw, 22 ms/cmd |
 | 2 | Interactive terminal: custom DOS console handler, raw mode | next |
 | 3 | Hardening: shared-secret auth, keepalives, reconnect, multi-session | later |
 
@@ -106,10 +106,11 @@ ant/
 
 ## Status
 
-Phase 1 verified end-to-end in the emulator rig: 40 ms average command
-round-trip, output and return codes relayed byte-exact. Real-hardware
-deployment kit ready (`deploy/`), awaiting an Amiga session. Phase 2
-(interactive console handler) is next.
+**Phase 1 is live on real hardware.** Deployed to an Amiga (KS 47.63 /
+68060) over Wi-Fi: 22 ms average command round-trip, auto-starts from
+`S:User-Startup` and survives a cold boot, and held 40/40 probes with zero
+drops across a 20-minute soak test. The emulator rig (`rig/`) remains the
+dev/CI path. Phase 2 (interactive console handler) is next.
 
 ## License
 
