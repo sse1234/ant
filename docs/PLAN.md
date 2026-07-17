@@ -57,6 +57,18 @@
   (`Open("T:...")` with no T: assign) and matches a known real-hardware
   failure mode (requesters silently freezing remote shells).
 
+## Phase 1.5 — per-command working directory
+
+Real-world finding (AmigaVision work): WHDLoad resolves a slave's data
+drawer relative to the current directory, and ant-server runs every command
+from its own CWD — so `WHDLoad path/to/game.slave` fails with DOS-Error
+#205 on locking the data dir. Workaround: Execute a 2-line script that CDs
+first. Proper fix options:
+
+- [ ] Protocol: optional `ANT:cwd <dir>` prefix line before a command, or
+- [ ] Client-side: `ant.py run --cwd <dir> "<cmd>"` that wraps the command
+      in a temp script transparently
+
 ## Phase 2 — interactive terminal
 
 - [ ] Custom DOS handler (ANT-CON:) implementing console packets
