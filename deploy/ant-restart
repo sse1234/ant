@@ -1,6 +1,13 @@
 ; S:ant-restart — keep ant-server alive (ANT deploy kit).
 ; Started from S:User-Startup via: Run >NIL: Execute S:ant-restart
+;
+; Optional self-heal: WHDLoad game sessions take over the machine and can
+; leave the network interface offline/unconfigured afterwards (daemon dies
+; too). Re-configuring the interface inside the restart loop repairs both
+; within seconds of a game quitting. Uncomment and adjust the interface
+; name for your setup:
 Lab restart
 C:ant-server
+; ConfigureNetInterface <yourIF> ONLINE CONFIGURE=DHCP TIMEOUT=30
 Wait 5
 Skip restart BACK
